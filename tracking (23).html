@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TRACKING CHARIOTS CABINE - 3 TRAINS</title>
+<style>
+:root{
+  --line:#e5e7eb;
+  --primary:#0aa2b8;
+  --success:#37b24d;
+  --warning:#f59f00;
+  --tick:#8aa0b2;
+  --mtick:#e3e9ef;
+  --train1:#3b82f6;
+  --train2:#8b5cf6;
+  --train3:#ec4899;
+  --symbol-size:18px;
+  --symbol-border:3px;
+  --symbol-cross:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:#111;font:14px/1.35 ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial}
+
+/* TOPBAR */
+#topbar{position:sticky;top:0;z-index:100;border-bottom:2px solid #111;background:#fafafa;padding:10px 16px}
+#topbar .wrap{max-width:2400px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{padding:9px 14px;border:2px solid #111;border-radius:10px;background:#fff;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;text-transform:uppercase;letter-spacing:0.3px}
+.tab:hover{background:#f3f4f6;transform:translateY(-1px)}
+.tab.active{background:#111;color:#fff;border-color:#111}
+#controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button,input,select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;cursor:pointer}
+button:hover{background:#f3f4f6}
+button.primary{background:#0aa2b8;color:#fff;border-color:#0aa2b8;font-weight:700}
+button.primary:hover{background:#088a9e}
+button.toggle{border:2px solid #888;background:#fff;color:#495057;font-weight:600;transition:all .2s}
+button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
+
+/* Header controls */
+.view-mode-btn{padding:6px 10px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.view-mode-btn:hover{background:#f3f4f6}
+.view-mode-btn.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
+.train-btn{padding:6px 10px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.train-btn:hover{background:#f3f4f6}
+.train-btn.active{color:#fff;border-color:currentColor}
+.train-btn.all.active{background:#111;border-color:#111}
+.train-btn.t1.active{background:var(--train1);border-color:var(--train1)}
+.train-btn.t2.active{background:var(--train2);border-color:var(--train2)}
+.train-btn.t3.active{background:var(--train3);border-color:var(--train3)}
+.range-display{font-size:11px;color:#6b7280;font-weight:600;background:#fff;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb}
+
+/* CHARIOT SELECTOR DROPDOWN */
+.chariot-selector{position:relative;display:inline-block}
+.chariot-selector-btn{padding:6px 10px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;min-width:160px;text-align:left}
+.chariot-selector-btn:hover{background:#f3f4f6}
+.chariot-selector-btn.active{border-color:#0aa2b8}
+.chariot-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:2px solid #0aa2b8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:200;min-width:280px;max-height:400px;overflow:hidden}
+.chariot-dropdown.show{display:block}
+.chariot-dropdown-header{padding:8px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;gap:6px}
+.chariot-dropdown-header button{padding:4px 8px;font-size:10px;border:1px solid #d0d7de;border-radius:4px;background:#fff;cursor:pointer;font-weight:600}
+.chariot-dropdown-header button:hover{background:#f3f4f6}
+.chariot-list{max-height:320px;overflow-y:auto;padding:4px}
+.chariot-item{display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:4px;transition:background .15s}
+.chariot-item:hover{background:#f3f4f6}
+.chariot-item input[type="checkbox"]{cursor:pointer;width:16px;height:16px}
+.chariot-item-name{flex:1;font-size:11px;font-weight:600;color:#374151}
+.chariot-item-train{padding:2px 6px;border-radius:3px;font-size:9px;font-weight:800;color:#fff}
+.chariot-item-train.t1{background:var(--train1)}
+.chariot-item-train.t2{background:var(--train2)}
+.chariot-item-train.t3{background:var(--train3)}
+
+/* PAGES */
+.content{width:100vw;padding:20px;padding-bottom:70px}
+.page{display:none}.page.active{display:block}
+
+/* EDITOR PAGE */
+.editor-container{display:flex;flex-direction:column;gap:16px;margin-top:20px}
+.editor-section{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:16px}
+.editor-section h3{margin:0 0 12px;font-size:14px;font-weight:800;color:#111;border-bottom:2px solid #e5e7eb;padding-bottom:6px}
+
+/* ONE-LINE LANE EDITOR - POSTE 3X PLUS LARGE (360px au lieu de 60px) */
+.lane-editor{margin-bottom:6px;padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;display:grid;grid-template-columns:auto 140px 60px 60px 60px 60px 60px 360px 80px 80px 50px 80px 80px;gap:6px;align-items:center}
+.lane-editor .train-badge{padding:4px 8px;border-radius:4px;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;white-space:nowrap}
+.lane-editor .train-badge.t1{background:var(--train1)}
+.lane-editor .train-badge.t2{background:var(--train2)}
+.lane-editor .train-badge.t3{background:var(--train3)}
+.lane-editor .name-input{font-weight:700;font-size:12px;border:1px solid #d0d7de;padding:6px 8px;border-radius:4px;width:100%}
+.lane-editor input[type="number"],.lane-editor select{width:100%;padding:5px 6px;border:1px solid #d0d7de;border-radius:4px;font-size:11px;font-weight:600;text-align:center}
+/* RACK EN GRAS dans l'éditeur */
+.lane-editor input[data-field="rack"]{font-weight:900;font-size:12px}
+.lane-editor .btn-icon{font-size:11px;padding:5px 8px;border:1px solid #d0d7de;border-radius:4px;background:#fff;cursor:pointer;transition:all .2s}
+.lane-editor .btn-icon:hover{background:#f3f4f6}
+.lane-editor .btn-delete{background:#fee2e2;border-color:#fecaca;color:#dc2626}
+.lane-editor .btn-delete:hover{background:#fecaca}
+
+/* COMPACT IMPORT/EXPORT */
+.import-export-compact{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.io-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px}
+.io-group label{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase}
+.io-actions{display:flex;gap:6px}
+.io-actions button{font-size:11px;padding:6px 10px}
+.csv-help{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px;font-size:10px;color:#1e40af;margin-top:8px}
+.csv-help code{background:#dbeafe;padding:2px 4px;border-radius:3px;font-family:monospace;font-size:9px}
+
+/* TIMELINE PAGE */
+.timeline-controls{background:#f9fafb;border:2px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.timeline-controls .label{font-weight:700;font-size:12px;color:#495057}
+.view-mode-selector{display:flex;gap:8px;padding:8px;background:#fff;border-radius:8px;border:1px solid #e5e7eb}
+.view-mode-btn{padding:8px 12px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.view-mode-btn:hover{background:#f3f4f6}
+.view-mode-btn.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
+.train-filter{display:flex;gap:6px;padding:8px;background:#fff;border-radius:8px;border:1px solid #e5e7eb}
+.train-btn{padding:6px 10px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s}
+.train-btn:hover{background:#f3f4f6}
+.train-btn.active{color:#fff;border-color:currentColor}
+.train-btn.all.active{background:#111;border-color:#111}
+.train-btn.t1.active{background:var(--train1);border-color:var(--train1)}
+.train-btn.t2.active{background:var(--train2);border-color:var(--train2)}
+.train-btn.t3.active{background:var(--train3);border-color:var(--train3)}
+.range-display{font-size:12px;color:#6b7280;font-weight:600;background:#fff;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb}
+
+.lanes-container{display:flex;flex-direction:column;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);overflow:hidden;border:2px solid #e5e7eb}
+
+/* LANE STYLES */
+.lane{display:grid;grid-template-columns:200px 1fr;align-items:center;min-height:80px;border-bottom:2px solid #e9ecef;column-gap:12px;padding:12px 0;background:#fff;transition:all .2s}
+.lane:hover{background:#fafbfc}
+.lane.hidden{display:none}
+.lane.compact{min-height:50px;padding:6px 0}
+.lane.compact .timeline{height:50px}
+.lane-meta{grid-column:1;padding-left:16px}
+.lane-name{font-weight:800;font-size:15px;color:#212529;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.lane-name .train-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.lane-name .train-dot.t1{background:var(--train1)}
+.lane-name .train-dot.t2{background:var(--train2)}
+.lane-name .train-dot.t3{background:var(--train3)}
+.lane-info{font-size:11px;color:#6b7280;display:flex;gap:8px;flex-wrap:wrap}
+.lane-info .badge{background:#e5e7eb;padding:2px 6px;border-radius:4px;font-weight:600}
+.lane-info .rack-badge{background:#3b82f6;color:#fff;padding:3px 10px;font-size:12px;font-weight:800;border-radius:5px}
+.lane.compact .lane-name{font-size:12px}
+.lane.compact .lane-info{font-size:10px;gap:4px}
+.lane.compact .badge{padding:1px 4px}
+
+/* TRAIN GROUP SEPARATORS */
+.train-separator{background:linear-gradient(to right,#f3f4f6,#e5e7eb,#f3f4f6);padding:8px 16px;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #d1d5db;display:flex;align-items:center;gap:8px}
+.train-separator .dot{width:10px;height:10px;border-radius:50%}
+.train-separator.t1{color:var(--train1)}
+.train-separator.t1 .dot{background:var(--train1)}
+.train-separator.t2{color:var(--train2)}
+.train-separator.t2 .dot{background:var(--train2)}
+.train-separator.t3{color:var(--train3)}
+.train-separator.t3 .dot{background:var(--train3)}
+
+/* TIMELINE VISUALS */
+.timeline{grid-column:2;position:relative;height:80px;padding-right:16px}
+.ruler{position:absolute;left:0;right:0;top:50%;height:3px;background:linear-gradient(to right,#e9ecef 0%,#dee2e6 100%);transform:translateY(-50%);border-radius:2px}
+.tick{position:absolute;top:calc(50% - 12px);width:0;height:24px;border-left:2px solid var(--tick);transform:translateX(-1px);z-index:3}
+.tick.zero{border-left-color:#212529;border-left-width:3px}
+.mtick{position:absolute;top:calc(50% - 8px);width:0;height:16px;border-left:1px solid #94a3b8;transform:translateX(-1px);z-index:3}
+.label{position:absolute;top:-28px;left:50%;transform:translateX(-50%);font-size:12px;color:#495057;font-weight:700;background:#fff;padding:2px 8px;border-radius:4px;border:1px solid #dee2e6;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.05);z-index:4}
+.tick.zero .label{background:#212529;color:#fff;border-color:#212529}
+.compact .tick{height:18px;top:calc(50% - 9px)}
+.compact .mtick{height:12px;top:calc(50% - 6px)}
+.compact .label{font-size:10px;padding:1px 4px;top:-20px}
+
+.symbol{position:absolute;top:50%;transform:translate(-50%,-50%);cursor:pointer;user-select:none;z-index:5}
+.symbol:hover{transform:translate(-50%,-50%) scale(1.15)}
+.sym-circle{width:var(--symbol-size);height:var(--symbol-size);border:var(--symbol-border) solid #212529;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.sym-disc{width:var(--symbol-size);height:var(--symbol-size);border-radius:50%;background:#212529;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.sym-xcircle{position:relative;width:var(--symbol-size);height:var(--symbol-size);border:var(--symbol-border) solid #212529;border-radius:50%;background:#f59f00;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+.sym-xcircle:before,.sym-xcircle:after{content:"";position:absolute;left:50%;top:50%;width:var(--symbol-cross);height:var(--symbol-border);background:#212529;transform-origin:center}
+.sym-xcircle:before{transform:translate(-50%,-50%) rotate(45deg)}
+.sym-xcircle:after{transform:translate(-50%,-50%) rotate(-45deg)}
+.compact .sym-circle,.compact .sym-disc,.compact .sym-xcircle{width:var(--symbol-size);height:var(--symbol-size);border-width:var(--symbol-border)}
+.compact .sym-xcircle:before,.compact .sym-xcircle:after{width:var(--symbol-cross);height:var(--symbol-border)}
+
+.time-zone{position:absolute;pointer-events:none;opacity:.85;border-radius:4px;display:flex;align-items:center;justify-content:center;z-index:1}
+.time-zone.usage{top:50%;transform:translateY(-50%);height:18px;background:linear-gradient(to bottom,rgba(150,150,150,.3),rgba(150,150,150,.5))}
+.time-zone.wait{top:calc(50% + 9px);height:18px;background:linear-gradient(to bottom,rgba(66,153,225,.5),rgba(66,153,225,.7))}
+.time-zone.wait.mirror{opacity:.85}
+.time-zone.usage.mirror{opacity:.3}
+.time-zone.buffer-coverage{top:calc(50% + 27px);height:18px;background:linear-gradient(to bottom,rgba(37,99,235,.6),rgba(37,99,235,.8));border-top:1px solid rgba(37,99,235,.3)}
+.time-label{font-weight:800;font-size:11px;color:#000;text-shadow:0 0 3px #fff,0 0 6px #fff;white-space:nowrap}
+.compact .time-zone.usage{height:14px}
+.compact .time-zone.wait{height:14px}
+.compact .time-zone.buffer-coverage{top:calc(50% + 22px);height:14px}
+.compact .time-label{font-size:9px}
+
+.cycle-zone{position:absolute;top:0;bottom:0;background:transparent;border-left:1px dashed rgba(10,162,184,.15);border-right:1px dashed rgba(10,162,184,.15);pointer-events:none;z-index:0}
+.cycle-zone.negative{background:rgba(245,159,0,.08);border-color:rgba(245,159,0,.3)}
+.cycle-zone.positive{background:rgba(245,159,0,.08);border-color:rgba(245,159,0,.3)}
+
+/* MODE BLOCKS */
+.mode-blocks .time-zone.usage{height:28px;border-radius:8px;opacity:1;border:2px solid #666}
+.mode-blocks .time-zone.wait{height:28px;bottom:auto;top:50%;transform:translateY(-50%);border-radius:8px;opacity:1;border:2px solid #3b82f6}
+.mode-blocks .time-zone.buffer-coverage{height:28px;bottom:auto;top:calc(50% + 30px);transform:none;border-radius:8px;opacity:1;border:2px solid #2563eb}
+.mode-blocks .symbol{display:none}
+.mode-blocks.compact .time-zone.usage{height:20px}
+.mode-blocks.compact .time-zone.wait{height:20px}
+.mode-blocks.compact .time-zone.buffer-coverage{height:20px;top:calc(50% + 22px)}
+
+/* MODE GANTT */
+.mode-gantt .timeline{height:50px}
+.mode-gantt .time-zone{border-radius:6px;opacity:1}
+.mode-gantt .time-zone.usage{height:20px;top:8px;transform:none;background:#9ca3af;border:1px solid #6b7280}
+.mode-gantt .time-zone.wait{height:20px;top:30px;transform:none;background:#60a5fa;border:1px solid #3b82f6}
+.mode-gantt .time-zone.buffer-coverage{height:20px;top:52px;transform:none;background:#2563eb;border:1px solid #1e40af}
+.mode-gantt .symbol{top:8px;transform:translate(-50%,10px)}
+.mode-gantt .sym-disc,.mode-gantt .sym-circle,.mode-gantt .sym-xcircle{width:12px;height:12px;border-width:2px}
+.mode-gantt.compact .timeline{height:36px}
+.mode-gantt.compact .time-zone.usage{height:14px;top:4px}
+.mode-gantt.compact .time-zone.wait{height:14px;top:20px}
+.mode-gantt.compact .time-zone.buffer-coverage{height:14px;top:36px}
+
+/* KPI PANEL */
+.kpi-panel{position:fixed;bottom:0;left:0;right:0;background:#f9fafb;border-top:2px solid #e5e7eb;padding:6px 16px;z-index:10;box-shadow:0 -2px 8px rgba(0,0,0,.05)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.kpi-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;justify-content:center}
+.kpi-card .label{font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:2px;letter-spacing:0.3px}
+.kpi-card .value{font-size:16px;font-weight:900;color:#111;line-height:1.1}
+.kpi-card .detail{font-size:8px;color:#6b7280;margin-top:1px}
+.kpi-card.t1 .value{color:var(--train1)}
+.kpi-card.t2 .value{color:var(--train2)}
+.kpi-card.t3 .value{color:var(--train3)}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab active" data-tab="editor">ÉDITEUR</button>
+      <button class="tab" data-tab="tracking">TRACKING</button>
+    </div>
+    
+    <!-- EDITOR CONTROLS (shown when editor tab is active) -->
+    <div id="editorControls" style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="file" id="fileInputJSON" accept=".json" style="display:none"/>
+      <input type="file" id="fileInputCSV" accept=".csv" style="display:none"/>
+      <button id="btnLoadJSON" class="primary" style="font-size:11px;padding:6px 10px">📂 JSON</button>
+      <button id="btnLoadCSV" class="primary" style="font-size:11px;padding:6px 10px">📊 CSV</button>
+      <span style="height:20px;width:1px;background:#dee2e6"></span>
+      <button id="btnDownloadJSON" class="primary" style="font-size:11px;padding:6px 10px">💾 JSON</button>
+      <button id="btnDownloadCSV" class="primary" style="font-size:11px;padding:6px 10px">📊 CSV</button>
+      <button id="btnReset">🔄 RESET</button>
+    </div>
+    
+    <!-- TRACKING CONTROLS (shown when tracking tab is active) -->
+    <div id="trackingControls" style="margin-left:auto;display:none;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:700;color:#495057">MODE:</span>
+      <button class="view-mode-btn active" data-mode="symbols" style="font-size:14px;padding:6px 10px">●</button>
+      <button class="view-mode-btn" data-mode="blocks" style="font-size:14px;padding:6px 10px">▬</button>
+      <button class="view-mode-btn" data-mode="gantt" style="font-size:14px;padding:6px 10px">≡</button>
+      
+      <button id="toggleCompact" class="toggle active" style="font-size:14px;padding:6px 10px">⇕</button>
+      
+      <!-- CHARIOT SELECTOR -->
+      <div class="chariot-selector">
+        <button class="chariot-selector-btn" id="chariotSelectorBtn">
+          SÉLECTION: <span id="selectionCount">0/0</span> ▼
+        </button>
+        <div class="chariot-dropdown" id="chariotDropdown">
+          <div class="chariot-dropdown-header">
+            <button id="btnSelectAll">Tous</button>
+            <button id="btnSelectNone">Aucun</button>
+            <button id="btnSelectInvert">Inverser</button>
+            <button id="btnApplySelection" style="margin-left:auto;background:#0aa2b8;color:#fff;font-weight:700">✓ APPLIQUER</button>
+          </div>
+          <div class="chariot-list" id="chariotList"></div>
+        </div>
+      </div>
+      
+      <button class="train-btn all active" data-train="all" style="font-size:11px;padding:6px 10px">ALL</button>
+      <button class="train-btn t1" data-train="1" style="font-size:11px;padding:6px 10px">1</button>
+      <button class="train-btn t2" data-train="2" style="font-size:11px;padding:6px 10px">2</button>
+      <button class="train-btn t3" data-train="3" style="font-size:11px;padding:6px 10px">3</button>
+      
+      <button id="toggleBuffer" class="toggle" style="font-size:11px;padding:6px 10px">← Buffer (-116)</button>
+      <button id="toggleCyclePlus" class="toggle" style="font-size:11px;padding:6px 10px">Cycle +1 (232) →</button>
+      
+      <span style="height:20px;width:1px;background:#dee2e6"></span>
+      <button id="toggleCoverage1" class="toggle" style="font-size:11px;padding:6px 10px">Couverture 1</button>
+      <button id="toggleCoverage2" class="toggle" style="font-size:11px;padding:6px 10px">Couverture 2</button>
+      
+      <span style="height:20px;width:1px;background:#dee2e6"></span>
+      <input type="color" id="colorUsage" value="#969696" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur utilisation (gris)"/>
+      <input type="color" id="colorCoverage" value="#4299e1" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur couverture (bleu)"/>
+      <input type="color" id="colorDoubleCoverage" value="#2563eb" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur double couverture"/>
+      <span style="height:20px;width:1px;background:#dee2e6"></span>
+      <span style="font-size:10px;font-weight:700;color:#495057">● TAILLE:</span>
+      <input type="number" id="symbolSize" value="18" min="8" max="50" step="2" style="width:50px;padding:4px 6px;border:1px solid #d0d7de;border-radius:4px;font-size:11px;font-weight:600;text-align:center" title="Taille des symboles (px)"/>
+    </div>
+  </div>
+</div>
+
+<main class="content">
+
+<!-- EDITOR PAGE -->
+<section class="page active" id="editor">
+  <div class="editor-container">
+    <!-- Main Editor Section -->
+    <div class="editor-section" style="margin-top:0">
+      <h3>📝 Chariots</h3>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <button id="btnAddLane" class="primary" style="flex:1">+ AJOUTER CHARIOT</button>
+        <span style="font-size:11px;font-weight:700;color:#6b7280">TRIER PAR:</span>
+        <button id="btnSortTrain" style="font-size:11px;padding:6px 10px">🚂 Train</button>
+        <button id="btnSortName" style="font-size:11px;padding:6px 10px">📝 Nom</button>
+        <button id="btnSortPris" style="font-size:11px;padding:6px 10px">● Pris</button>
+      </div>
+      <div id="lanesEditorContainer" style="max-height:calc(100vh - 240px);overflow-y:auto;padding-right:8px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACKING PAGE -->
+<section class="page" id="tracking">
+  <!-- KPI Panel -->
+  <div class="kpi-panel">
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </div>
+  
+  <div class="lanes-container" id="lanesTimeline"></div>
+</section>
+
+</main>
+
+<script>
+// ===== DATA MODEL =====
+let lanes = [
+  { name: 'Picking F', train: 2, disc: 0, circle: 58, cross: 70, buffer: 1, rack: 'F5A', poste: 'poste 1,4' },
+  { name: 'Fender', train: 1, disc: 0, circle: 20, cross: 35, buffer: 1, rack: 'B1M', poste: 'poste 6,7,8' }
+];
+
+// Color preferences
+let colorPrefs = {
+  usage: '#969696',  // Gris pour utilisation
+  coverage: '#4299e1',  // Bleu pour couverture
+  doubleCoverage: '#2563eb'  // Bleu foncé pour double couverture
+};
+
+// Symbol size preference
+let symbolSize = 18;  // Taille par défaut des symboles en px
+
+// Chariot selection state
+let selectedChariots = new Set();  // Set des index de chariots sélectionnés
+
+// ===== VIEW STATE =====
+let showBuffer = false;
+let showCyclePlus = false;
+let showCoverage1 = false;
+let showCoverage2 = false;
+let visualMode = 'symbols';
+let compactMode = true;  // COMPACT MODE PAR DÉFAUT
+let trainFilter = 'all';
+let MIN = 0, MAX = 116, RANGE = 116;
+let SCALE = 6, MIN_SCALE = 2.5;
+
+// ===== INIT =====
+function init() {
+  setupTabs();
+  setupEditor();
+  setupTimelines();
+  renderEditor();
+  updateTimelines();
+  updateSymbolSizes();  // Initialiser les tailles de symboles
+}
+
+// ===== TABS SYSTEM =====
+function setupTabs() {
+  const editorControls = document.getElementById('editorControls');
+  const trackingControls = document.getElementById('trackingControls');
+  
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(target).classList.add('active');
+      
+      // Show/hide appropriate header controls
+      if(target === 'editor') {
+        editorControls.style.display = 'flex';
+        trackingControls.style.display = 'none';
+      } else {
+        editorControls.style.display = 'none';
+        trackingControls.style.display = 'flex';
+        updateTimelines();
+      }
+    });
+  });
+}
+
+// ===== EDITOR =====
+function setupEditor() {
+  document.getElementById('btnAddLane').addEventListener('click', () => {
+    lanes.push({ name: 'Nouveau Chariot', train: 1, disc: 0, circle: 58, cross: 70, buffer: 0, rack: 'F5A', poste: '' });
+    renderEditor();
+  });
+  
+  document.getElementById('btnSortTrain').addEventListener('click', sortLanesByTrain);
+  document.getElementById('btnSortName').addEventListener('click', sortLanesByName);
+  document.getElementById('btnSortPris').addEventListener('click', sortLanesByPris);
+  
+  // Trigger file inputs on button clicks
+  document.getElementById('btnLoadJSON').addEventListener('click', () => {
+    document.getElementById('fileInputJSON').click();
+  });
+  
+  document.getElementById('btnLoadCSV').addEventListener('click', () => {
+    document.getElementById('fileInputCSV').click();
+  });
+  
+  // Handle file selection
+  document.getElementById('fileInputJSON').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if(data.lanes) {
+          lanes = data.lanes;
+          selectedChariots.clear(); // Reset selection on new import
+          if(data.colors) {
+            colorPrefs = data.colors;
+            document.getElementById('colorUsage').value = colorPrefs.usage;
+            document.getElementById('colorCoverage').value = colorPrefs.coverage;
+            if(colorPrefs.doubleCoverage) {
+              document.getElementById('colorDoubleCoverage').value = colorPrefs.doubleCoverage;
+            }
+          }
+          if(data.symbolSize !== undefined) {
+            symbolSize = data.symbolSize;
+            document.getElementById('symbolSize').value = symbolSize;
+            updateSymbolSizes();
+          }
+          renderEditor();
+          updateSelectionCount();
+          alert('JSON chargé avec succès !');
+        }
+      } catch(err) {
+        alert('Erreur de lecture du JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
+  });
+  
+  document.getElementById('fileInputCSV').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const csv = ev.target.result;
+        const lines = csv.split('\n').filter(l => l.trim());
+        const newLanes = [];
+        
+        lines.forEach((line, idx) => {
+          if(idx === 0) return; // Skip header
+          const parts = line.split(';').map(p => p.trim());
+          if(parts.length >= 6) {
+            newLanes.push({
+              name: parts[0] || 'Chariot',
+              train: parseInt(parts[1]) || 1,
+              disc: parts[2] ? parseFloat(parts[2]) : 0,
+              circle: parts[3] ? parseFloat(parts[3]) : 0,
+              cross: parts[4] ? parseFloat(parts[4]) : 0,
+              rack: parts[5] || '',
+              poste: parts[6] || '',
+              buffer: parseInt(parts[7]) || 0
+              // Les colonnes 8 et 9 (couleurs si présentes) sont ignorées
+            });
+          }
+        });
+        
+        if(newLanes.length > 0) {
+          lanes = newLanes;
+          selectedChariots.clear(); // Reset selection on new import
+          renderEditor();
+          updateTimelines();
+          updateSelectionCount();
+          alert(`${newLanes.length} chariots importés avec succès !`);
+        }
+      } catch(err) {
+        alert('Erreur de lecture du CSV: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
+  });
+  
+  document.getElementById('btnDownloadJSON').addEventListener('click', exportJSON);
+  document.getElementById('btnDownloadCSV').addEventListener('click', exportCSV);
+  
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if(confirm('Réinitialiser aux valeurs par défaut ?')) {
+      lanes = [
+        { name: 'Picking F', train: 2, disc: 0, circle: 58, cross: 70, buffer: 1, rack: 'F5A', poste: 'poste 1,4' },
+        { name: 'Fender', train: 1, disc: 0, circle: 20, cross: 35, buffer: 1, rack: 'B1M', poste: 'poste 6,7,8' }
+      ];
+      selectedChariots.clear();
+      renderEditor();
+      updateTimelines();
+      updateSelectionCount();
+    }
+  });
+}
+
+function renderEditor() {
+  const container = document.getElementById('lanesEditorContainer');
+  container.innerHTML = '';
+  
+  lanes.forEach((lane, index) => {
+    const editor = document.createElement('div');
+    editor.className = 'lane-editor';
+    editor.innerHTML = `
+      <span class="train-badge t${lane.train}">T${lane.train}</span>
+      <input type="text" value="${lane.name}" class="name-input"
+             data-index="${index}" data-field="name" placeholder="Nom du chariot"/>
+      <select data-index="${index}" data-field="train" title="Train">
+        <option value="1" ${lane.train === 1 ? 'selected' : ''}>T1</option>
+        <option value="2" ${lane.train === 2 ? 'selected' : ''}>T2</option>
+        <option value="3" ${lane.train === 3 ? 'selected' : ''}>T3</option>
+      </select>
+      <input type="number" value="${lane.disc}" step="0.25" title="Pris"
+             data-index="${index}" data-field="disc" placeholder="●"/>
+      <input type="number" value="${lane.circle}" step="0.25" title="Relâché"
+             data-index="${index}" data-field="circle" placeholder="○"/>
+      <input type="number" value="${lane.cross}" step="0.25" title="Échange"
+             data-index="${index}" data-field="cross" placeholder="⊗"/>
+      <input type="text" value="${lane.rack || ''}" title="Rack" maxlength="10"
+             data-index="${index}" data-field="rack" placeholder="Rack" style="text-transform:uppercase"/>
+      <input type="text" value="${lane.poste || ''}" title="Poste" 
+             data-index="${index}" data-field="poste" placeholder="poste X,Y,Z"/>
+      <select data-index="${index}" data-field="buffer" title="Buffer">
+        <option value="0" ${lane.buffer === 0 ? 'selected' : ''}>NON</option>
+        <option value="1" ${lane.buffer === 1 ? 'selected' : ''}>OUI</option>
+      </select>
+      <div style="display:flex;gap:2px">
+        <button onclick="moveLaneUp(${index})" class="btn-icon" title="Monter" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+        <button onclick="moveLaneDown(${index})" class="btn-icon" title="Descendre" ${index === lanes.length - 1 ? 'disabled' : ''}>⬇️</button>
+      </div>
+      <button onclick="duplicateLane(${index})" class="btn-icon" title="Dupliquer">📋</button>
+      <button onclick="deleteLane(${index})" class="btn-icon btn-delete" title="Supprimer">🗑️</button>
+    `;
+    
+    editor.querySelectorAll('input, select').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const idx = parseInt(e.target.dataset.index);
+        const field = e.target.dataset.field;
+        let value = e.target.value;
+        
+        if(field === 'disc' || field === 'circle' || field === 'cross') {
+          value = parseFloat(value) || 0;
+        } else if(field === 'train' || field === 'buffer') {
+          value = parseInt(value) || 0;
+        } else if(field === 'rack') {
+          value = value.toUpperCase();
+        }
+        
+        lanes[idx][field] = value;
+        
+        // Update train badge
+        if(field === 'train') {
+          const badge = editor.querySelector('.train-badge');
+          badge.className = 'train-badge t' + value;
+          badge.textContent = 'T' + value;
+        }
+      });
+    });
+    
+    container.appendChild(editor);
+  });
+}
+
+function moveLaneUp(index) {
+  if(index > 0) {
+    [lanes[index - 1], lanes[index]] = [lanes[index], lanes[index - 1]];
+    renderEditor();
+  }
+}
+
+function moveLaneDown(index) {
+  if(index < lanes.length - 1) {
+    [lanes[index], lanes[index + 1]] = [lanes[index + 1], lanes[index]];
+    renderEditor();
+  }
+}
+
+function duplicateLane(index) {
+  const newLane = JSON.parse(JSON.stringify(lanes[index]));
+  newLane.name = newLane.name + ' (copie)';
+  lanes.splice(index + 1, 0, newLane);
+  renderEditor();
+}
+
+function deleteLane(index) {
+  if(confirm(`Supprimer "${lanes[index].name}" ?`)) {
+    lanes.splice(index, 1);
+    renderEditor();
+  }
+}
+
+function sortLanesByTrain() {
+  lanes.sort((a, b) => {
+    if(a.train !== b.train) return a.train - b.train;
+    return a.name.localeCompare(b.name);
+  });
+  renderEditor();
+}
+
+function sortLanesByName() {
+  lanes.sort((a, b) => a.name.localeCompare(b.name));
+  renderEditor();
+}
+
+function sortLanesByPris() {
+  lanes.sort((a, b) => {
+    if(a.disc !== b.disc) return a.disc - b.disc;
+    return a.name.localeCompare(b.name);
+  });
+  renderEditor();
+}
+
+function exportJSON() {
+  const data = {
+    lanes: lanes,
+    colors: colorPrefs,
+    symbolSize: symbolSize
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tracking_chariots.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportCSV() {
+  let csv = 'Nom;Train;Pris;Relache;Echange;Rack;Poste;Buffer\n';
+  lanes.forEach(lane => {
+    csv += `${lane.name};${lane.train};${lane.disc||''};${lane.circle||''};${lane.cross||''};${lane.rack || ''};${lane.poste || ''};${lane.buffer}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tracking_chariots.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== CHARIOT SELECTOR =====
+function setupChariotSelector() {
+  const btn = document.getElementById('chariotSelectorBtn');
+  const dropdown = document.getElementById('chariotDropdown');
+  
+  // Toggle dropdown
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+    btn.classList.toggle('active');
+    renderChariotList();
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if(!dropdown.contains(e.target) && e.target !== btn) {
+      dropdown.classList.remove('show');
+      btn.classList.remove('active');
+    }
+  });
+  
+  // Quick actions
+  document.getElementById('btnSelectAll').addEventListener('click', () => {
+    selectedChariots.clear();
+    lanes.forEach((_, idx) => selectedChariots.add(idx));
+    updateAllCheckboxes();
+    updateSelectionCount();
+    updateTimelines();
+  });
+  
+  document.getElementById('btnSelectNone').addEventListener('click', () => {
+    selectedChariots.clear();
+    updateAllCheckboxes();
+    updateSelectionCount();
+    updateTimelines();
+  });
+  
+  document.getElementById('btnSelectInvert').addEventListener('click', () => {
+    const newSelection = new Set();
+    lanes.forEach((_, idx) => {
+      if(!selectedChariots.has(idx)) {
+        newSelection.add(idx);
+      }
+    });
+    selectedChariots = newSelection;
+    updateAllCheckboxes();
+    updateSelectionCount();
+    updateTimelines();
+  });
+  
+  // Apply button - update timelines
+  document.getElementById('btnApplySelection').addEventListener('click', () => {
+    updateTimelines();
+    dropdown.classList.remove('show');
+    btn.classList.remove('active');
+  });
+  
+  updateSelectionCount();
+}
+
+function renderChariotList() {
+  const listContainer = document.getElementById('chariotList');
+  listContainer.innerHTML = '';
+  
+  lanes.forEach((lane, index) => {
+    // Filter by train if needed
+    if(trainFilter !== 'all' && lane.train !== parseInt(trainFilter)) {
+      return; // Skip chariots not in selected train
+    }
+    
+    const item = document.createElement('div');
+    item.className = 'chariot-item';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = selectedChariots.has(index);
+    checkbox.dataset.index = index;
+    checkbox.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(checkbox.dataset.index);
+      if(checkbox.checked) {
+        selectedChariots.add(idx);
+      } else {
+        selectedChariots.delete(idx);
+      }
+      updateSelectionCount();
+      // PAS de updateTimelines ici !
+    });
+    
+    const name = document.createElement('span');
+    name.className = 'chariot-item-name';
+    name.textContent = lane.name;
+    
+    const trainBadge = document.createElement('span');
+    trainBadge.className = `chariot-item-train t${lane.train}`;
+    trainBadge.textContent = `T${lane.train}`;
+    
+    item.addEventListener('click', (e) => {
+      if(e.target === checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      checkbox.dispatchEvent(new Event('change'));
+    });
+    
+    item.appendChild(checkbox);
+    item.appendChild(name);
+    item.appendChild(trainBadge);
+    listContainer.appendChild(item);
+  });
+}
+
+function updateSelectionCount() {
+  const count = selectedChariots.size;
+  const total = lanes.length;
+  document.getElementById('selectionCount').textContent = `${count}/${total}`;
+}
+
+function updateAllCheckboxes() {
+  const checkboxes = document.querySelectorAll('#chariotList input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    const index = parseInt(checkbox.dataset.index);
+    checkbox.checked = selectedChariots.has(index);
+  });
+}
+
+// ===== TIMELINES =====
+function setupTimelines() {
+  // Chariot selector dropdown
+  setupChariotSelector();
+  
+  // View mode buttons
+  document.querySelectorAll('.view-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      visualMode = btn.dataset.mode;
+      updateTimelines();
+    });
+  });
+  
+  // Compact mode toggle
+  document.getElementById('toggleCompact').addEventListener('click', () => {
+    compactMode = !compactMode;
+    document.getElementById('toggleCompact').classList.toggle('active', compactMode);
+    updateTimelines();
+  });
+  
+  // Train filter buttons
+  document.querySelectorAll('.train-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.train-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      trainFilter = btn.dataset.train;
+      renderChariotList(); // Refresh chariot list when train filter changes
+      updateTimelines();
+    });
+  });
+  
+  // Range toggles
+  document.getElementById('toggleBuffer').addEventListener('click', () => {
+    showBuffer = !showBuffer;
+    document.getElementById('toggleBuffer').classList.toggle('active', showBuffer);
+    updateViewRange();
+  });
+  
+  document.getElementById('toggleCyclePlus').addEventListener('click', () => {
+    showCyclePlus = !showCyclePlus;
+    document.getElementById('toggleCyclePlus').classList.toggle('active', showCyclePlus);
+    updateViewRange();
+  });
+  
+  // Coverage toggles
+  document.getElementById('toggleCoverage1').addEventListener('click', () => {
+    showCoverage1 = !showCoverage1;
+    document.getElementById('toggleCoverage1').classList.toggle('active', showCoverage1);
+    updateTimelines();
+  });
+  
+  document.getElementById('toggleCoverage2').addEventListener('click', () => {
+    showCoverage2 = !showCoverage2;
+    document.getElementById('toggleCoverage2').classList.toggle('active', showCoverage2);
+    updateTimelines();
+  });
+  
+  // Color pickers
+  document.getElementById('colorUsage').addEventListener('input', (e) => {
+    colorPrefs.usage = e.target.value;
+    updateTimelines();
+  });
+  
+  document.getElementById('colorCoverage').addEventListener('input', (e) => {
+    colorPrefs.coverage = e.target.value;
+    updateTimelines();
+  });
+  
+  document.getElementById('colorDoubleCoverage').addEventListener('input', (e) => {
+    colorPrefs.doubleCoverage = e.target.value;
+    updateTimelines();
+  });
+  
+  // Symbol size control
+  document.getElementById('symbolSize').addEventListener('input', (e) => {
+    symbolSize = parseInt(e.target.value) || 18;
+    updateSymbolSizes();
+  });
+}
+
+function updateSymbolSizes() {
+  // Update CSS variable for symbol size
+  document.documentElement.style.setProperty('--symbol-size', symbolSize + 'px');
+  document.documentElement.style.setProperty('--symbol-border', Math.max(2, Math.round(symbolSize / 6)) + 'px');
+  document.documentElement.style.setProperty('--symbol-cross', Math.round(symbolSize * 0.65) + 'px');
+}
+
+function updateViewRange() {
+  MIN = showBuffer ? -116 : 0;
+  MAX = showCyclePlus ? 232 : 116;
+  RANGE = MAX - MIN;
+  updateTimelines();
+}
+
+function updateTimelines() {
+  updateKPIs();
+  
+  const container = document.getElementById('lanesTimeline');
+  container.innerHTML = '';
+  container.className = 'lanes-container mode-' + visualMode;
+  if(compactMode) container.classList.add('compact');
+  
+  // Time lane
+  createTimeLane(container);
+  
+  // Filter lanes by selection
+  const filteredLanes = lanes.filter((lane, idx) => {
+    // Must be selected
+    if(!selectedChariots.has(idx)) return false;
+    // Must match train filter if not "all"
+    if(trainFilter !== 'all' && lane.train !== parseInt(trainFilter)) return false;
+    return true;
+  });
+  
+  // Group lanes by train if showing all trains
+  if(trainFilter === 'all') {
+    [1, 2, 3].forEach(trainNum => {
+      const trainLanes = filteredLanes.filter(l => l.train === trainNum);
+      if(trainLanes.length > 0) {
+        createTrainSeparator(container, trainNum, trainLanes.length);
+        trainLanes.forEach(lane => createDataLane(container, lane));
+      }
+    });
+  } else {
+    // Show only selected train
+    filteredLanes.forEach(lane => createDataLane(container, lane));
+  }
+  
+  recomputeScale();
+}
+
+function updateKPIs() {
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML = '';
+  
+  const total = lanes.length;
+  const t1Count = lanes.filter(l => l.train === 1).length;
+  const t2Count = lanes.filter(l => l.train === 2).length;
+  const t3Count = lanes.filter(l => l.train === 3).length;
+  const bufferCount = lanes.filter(l => l.buffer === 1).length;
+  
+  const kpis = [
+    { label: 'Total Chariots', value: total, detail: '', cls: '' },
+    { label: 'Train 1', value: t1Count, detail: 'chariots', cls: 't1' },
+    { label: 'Train 2', value: t2Count, detail: 'chariots', cls: 't2' },
+    { label: 'Train 3', value: t3Count, detail: 'chariots', cls: 't3' },
+    { label: 'Avec Buffer', value: bufferCount, detail: `${Math.round(bufferCount/total*100)}%`, cls: '' }
+  ];
+  
+  kpis.forEach(kpi => {
+    const card = document.createElement('div');
+    card.className = 'kpi-card ' + kpi.cls;
+    card.innerHTML = `
+      <div class="label">${kpi.label}</div>
+      <div class="value">${kpi.value}</div>
+      <div class="detail">${kpi.detail}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function createTrainSeparator(container, trainNum, count) {
+  const sep = document.createElement('div');
+  sep.className = `train-separator t${trainNum}`;
+  sep.innerHTML = `<span class="dot"></span> TRAIN ${trainNum} — ${count} CHARIOTS`;
+  container.appendChild(sep);
+}
+
+function createTimeLane(container) {
+  const lane = document.createElement('div');
+  lane.className = 'lane' + (compactMode ? ' compact' : '');
+  
+  const meta = document.createElement('div');
+  meta.className = 'lane-meta';
+  meta.innerHTML = `<div class="lane-name" style="visibility:hidden">.</div>`;
+  
+  const timeline = document.createElement('div');
+  timeline.className = 'timeline';
+  
+  const ruler = document.createElement('div');
+  ruler.className = 'ruler';
+  timeline.appendChild(ruler);
+  
+  // Cycle zones
+  for(let i = -1; i <= 2; i++) {
+    const zone = document.createElement('div');
+    const startM = i * 116;
+    
+    // Negative zone (buffer), normal zone, or positive zone (cycle+1)
+    if(i < 0) {
+      zone.className = 'cycle-zone negative';
+    } else if(i >= 1) {
+      zone.className = 'cycle-zone positive';
+    } else {
+      zone.className = 'cycle-zone';
+    }
+    
+    zone.dataset.cycleStart = startM;
+    zone.dataset.cycleWidth = 116;
+    timeline.appendChild(zone);
+  }
+  
+  // Fine ticks (every 2 minutes)
+  const fineTickInterval = 2;
+  for(let m = Math.ceil(MIN / fineTickInterval) * fineTickInterval; m <= MAX; m += fineTickInterval) {
+    // Skip if this would be a major tick (every 4 minutes)
+    if(m % 4 !== 0) {
+      const ftick = document.createElement('div');
+      ftick.className = 'mtick';
+      ftick.dataset.m = m;
+      timeline.appendChild(ftick);
+    }
+  }
+  
+  // Major ticks (every 4 minutes)
+  const tickInterval = 4;
+  for(let m = Math.ceil(MIN / tickInterval) * tickInterval; m <= MAX; m += tickInterval) {
+    const tick = document.createElement('div');
+    tick.className = 'tick' + (m === 0 ? ' zero' : '');
+    tick.dataset.m = m;
+    tick.innerHTML = `<span class="label">${m}</span>`;
+    timeline.appendChild(tick);
+  }
+  
+  lane.appendChild(meta);
+  lane.appendChild(timeline);
+  container.appendChild(lane);
+}
+
+function createDataLane(container, data) {
+  const lane = document.createElement('div');
+  lane.className = 'lane' + (compactMode ? ' compact' : '');
+  lane.dataset.train = data.train;
+  
+  const meta = document.createElement('div');
+  meta.className = 'lane-meta';
+  
+  const bufferBadge = data.buffer === 1 ? '<span class="badge">BUF</span>' : '';
+  const rackBadge = data.rack ? `<span class="badge rack-badge">${data.rack}</span>` : '';
+  const posteBadge = data.poste ? `<span class="badge">${data.poste}</span>` : '';
+  meta.innerHTML = `
+    <div class="lane-name">
+      <span class="train-dot t${data.train}"></span>
+      ${data.name}
+    </div>
+    <div class="lane-info">
+      ${rackBadge}
+      ${posteBadge}
+      <span class="badge">● ${data.disc}</span>
+      <span class="badge">○ ${data.circle}</span>
+      <span class="badge">⊗ ${data.cross}</span>
+      ${bufferBadge}
+    </div>
+  `;
+  
+  const timeline = document.createElement('div');
+  timeline.className = 'timeline';
+  
+  const ruler = document.createElement('div');
+  ruler.className = 'ruler';
+  timeline.appendChild(ruler);
+  
+  // Cycle zones
+  for(let i = -1; i <= 2; i++) {
+    const zone = document.createElement('div');
+    const startM = i * 116;
+    
+    // Negative zone (buffer), normal zone, or positive zone (cycle+1)
+    if(i < 0) {
+      zone.className = 'cycle-zone negative';
+    } else if(i >= 1) {
+      zone.className = 'cycle-zone positive';
+    } else {
+      zone.className = 'cycle-zone';
+    }
+    
+    zone.dataset.cycleStart = startM;
+    zone.dataset.cycleWidth = 116;
+    timeline.appendChild(zone);
+  }
+  
+  // Fine ticks (every 4 minutes) - same as time lane
+  const fineTickInterval = 4;
+  for(let m = Math.ceil(MIN / fineTickInterval) * fineTickInterval; m <= MAX; m += fineTickInterval) {
+    const tickInterval = 58;
+    const isMajorTick = (m % tickInterval === 0);
+    if(!isMajorTick && m >= MIN && m <= MAX) {
+      const ftick = document.createElement('div');
+      ftick.className = 'mtick';
+      ftick.dataset.m = m;
+      timeline.appendChild(ftick);
+    }
+  }
+  
+  // Calculate positions
+  const disc = data.disc;
+  const circle = data.circle;
+  const cross = data.cross;
+  const hasBuffer = data.buffer === 1;
+  
+  let discPositions = [disc];
+  let circlePositions = [circle];
+  let crossPositions = [cross];
+  
+  // Generate positions for all visible cycles + 1 extra for coverage calculations
+  for(let i = 1; i <= 3; i++) {
+    const offset = i * 116;
+    // Always generate at least 2 extra cycles for coverage calculations
+    if(disc + offset <= MAX + 116) discPositions.push(disc + offset);
+    if(circle + offset <= MAX + 116) circlePositions.push(circle + offset);
+    if(cross + offset <= MAX + 116) crossPositions.push(cross + offset);
+  }
+  
+  // Always generate at least one buffer cycle for coverage 2 calculations
+  if(disc - 116 >= MIN - 116) discPositions.push(disc - 116);
+  if(circle - 116 >= MIN - 116) circlePositions.push(circle - 116);
+  if(cross - 116 >= MIN - 116) crossPositions.push(cross - 116);
+  
+  // Create symbols
+  discPositions.forEach(pos => {
+    if(pos >= MIN && pos <= MAX) {
+      const isMirror = pos < 0;
+      createSymbol(timeline, 'disc', pos, isMirror);
+    }
+  });
+  circlePositions.forEach(pos => {
+    if(pos >= MIN && pos <= MAX) {
+      const isMirror = pos < 0;
+      createSymbol(timeline, 'circle', pos, isMirror);
+    }
+  });
+  crossPositions.forEach(pos => {
+    if(pos >= MIN && pos <= MAX) {
+      const isMirror = pos < 0;
+      createSymbol(timeline, 'cross', pos, isMirror);
+    }
+  });
+  
+  // Create gray zones (usage)
+  discPositions.forEach(dPos => {
+    circlePositions.forEach(cPos => {
+      const cycleDiff = Math.abs((cPos - dPos) - (circle - disc));
+      if(cycleDiff < 1 && cPos > dPos && dPos >= MIN && cPos <= MAX) {
+        const isMirror = dPos < 0;
+        const duration = Math.round((cPos - dPos) * 10) / 10;
+        createTimeZone(timeline, dPos, cPos, 'usage', duration + ' min', isMirror);
+      }
+    });
+  });
+  
+  // Find the NEXT disc (●) after the exchange
+  // Find the NEXT disc (●) after the exchange - search without MAX limit to find discs in future cycles
+  const nextDisc = discPositions.filter(p => p > cross).sort((a,b) => a-b)[0];
+  
+  // Create blue zone (coverage 1) - only if Coverage 1 is enabled
+  // Goes from exchange (⊗) to NEXT disc (●)
+  if(showCoverage1 && nextDisc) {
+    const duration = Math.round((nextDisc - cross) * 10) / 10;
+    const isMirror = cross < 0;
+    createTimeZone(timeline, cross, nextDisc, 'wait', duration + ' min', isMirror);
+  }
+  
+  // Create buffer coverage zone (coverage 2) - only if Coverage 2 is enabled
+  // Goes from (exchange - 116) to SAME next disc (●) as Coverage 1
+  if(showCoverage2 && nextDisc) {
+    const bufferStart = cross - 116; // Exchange time of previous cycle
+    const bufferEnd = nextDisc; // SAME endpoint as Coverage 1
+    
+    // Create the zone - it will be clipped by recomputeScale if needed
+    if(bufferStart < bufferEnd) {
+      const bufferDuration = Math.round((bufferEnd - bufferStart) * 10) / 10;
+      createTimeZone(timeline, bufferStart, bufferEnd, 'buffer-coverage', bufferDuration + ' min', false);
+    }
+  }
+  
+  lane.appendChild(meta);
+  lane.appendChild(timeline);
+  container.appendChild(lane);
+}
+
+function createSymbol(timeline, kind, m, isMirror) {
+  const wrap = document.createElement('div');
+  wrap.className = 'symbol' + (isMirror ? ' mirror' : '');
+  wrap.dataset.m = m;
+  
+  const inner = document.createElement('div');
+  inner.className = (kind === 'disc' ? 'sym-disc' : (kind === 'circle' ? 'sym-circle' : 'sym-xcircle'));
+  wrap.appendChild(inner);
+  
+  timeline.appendChild(wrap);
+}
+
+function createTimeZone(timeline, fromM, toM, type, label, isMirror) {
+  const zone = document.createElement('div');
+  zone.className = 'time-zone ' + type + (isMirror ? ' mirror' : '');
+  zone.dataset.fromM = fromM;
+  zone.dataset.toM = toM;
+  
+  const labelEl = document.createElement('span');
+  labelEl.className = 'time-label';
+  labelEl.textContent = label;
+  zone.appendChild(labelEl);
+  
+  // Apply custom colors
+  if(type === 'usage') {
+    const rgb = hexToRgb(colorPrefs.usage);
+    zone.style.background = `linear-gradient(to bottom, rgba(${rgb.r},${rgb.g},${rgb.b},.3), rgba(${rgb.r},${rgb.g},${rgb.b},.5))`;
+  } else if(type === 'wait') {
+    const rgb = hexToRgb(colorPrefs.coverage);
+    zone.style.background = `linear-gradient(to bottom, rgba(${rgb.r},${rgb.g},${rgb.b},.5), rgba(${rgb.r},${rgb.g},${rgb.b},.7))`;
+  } else if(type === 'buffer-coverage') {
+    // Bleu foncé personnalisable pour la zone double couverture
+    const rgb = hexToRgb(colorPrefs.doubleCoverage);
+    zone.style.background = `linear-gradient(to bottom, rgba(${rgb.r},${rgb.g},${rgb.b},.6), rgba(${rgb.r},${rgb.g},${rgb.b},.8))`;
+  }
+  
+  timeline.appendChild(zone);
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 150, g: 150, b: 150 };
+}
+
+function recomputeScale() {
+  const container = document.getElementById('lanesTimeline');
+  const lanes = container.querySelectorAll('.lane');
+  if(lanes.length === 0) return;
+  
+  const availableWidth = lanes[0].querySelector('.timeline').offsetWidth;
+  SCALE = Math.max(MIN_SCALE, availableWidth / RANGE);
+  
+  container.querySelectorAll('.tick').forEach(t => {
+    const m = Number(t.dataset.m);
+    t.style.left = ((m - MIN) * SCALE) + 'px';
+  });
+  
+  container.querySelectorAll('.mtick').forEach(t => {
+    const m = Number(t.dataset.m);
+    t.style.left = ((m - MIN) * SCALE) + 'px';
+  });
+  
+  container.querySelectorAll('.cycle-zone').forEach(z => {
+    const startM = Number(z.dataset.cycleStart);
+    const width = Number(z.dataset.cycleWidth);
+    if(!isNaN(startM) && !isNaN(width)) {
+      z.style.left = ((startM - MIN) * SCALE) + 'px';
+      z.style.width = (width * SCALE) + 'px';
+    }
+  });
+  
+  container.querySelectorAll('.symbol').forEach(s => {
+    const m = Number(s.dataset.m);
+    if(!isNaN(m)) {
+      s.style.left = ((m - MIN) * SCALE) + 'px';
+    }
+  });
+  
+  container.querySelectorAll('.time-zone').forEach(z => {
+    const fromM = Number(z.dataset.fromM);
+    const toM = Number(z.dataset.toM);
+    if(!isNaN(fromM) && !isNaN(toM)) {
+      // Clip the zone if it starts before MIN or ends after MAX
+      const clippedFromM = Math.max(fromM, MIN);
+      const clippedToM = Math.min(toM, MAX);
+      
+      // Only display if there's visible content
+      if(clippedToM > clippedFromM && clippedToM >= MIN && clippedFromM <= MAX) {
+        z.style.left = ((clippedFromM - MIN) * SCALE) + 'px';
+        z.style.width = ((clippedToM - clippedFromM) * SCALE) + 'px';
+        z.style.display = 'flex';
+      } else {
+        z.style.display = 'none';
+      }
+    }
+  });
+}
+
+window.addEventListener('resize', () => {
+  if(document.getElementById('tracking').classList.contains('active')) {
+    recomputeScale();
+  }
+});
+
+// Boot
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
