@@ -23,10 +23,10 @@
 html,body{margin:0;background:#fff;color:#111;font:14px/1.35 ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial}
 
 /* TOPBAR */
-#topbar{position:sticky;top:0;z-index:100;border-bottom:2px solid #111;background:#fafafa;padding:10px 16px}
-#topbar .wrap{max-width:2400px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tab{padding:9px 14px;border:2px solid #111;border-radius:10px;background:#fff;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;text-transform:uppercase;letter-spacing:0.3px}
+#topbar{position:sticky;top:0;z-index:100;border-bottom:2px solid #111;background:#fafafa;padding:6px 12px}
+#topbar .wrap{max-width:2400px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:6px 10px;border:2px solid #111;border-radius:8px;background:#fff;cursor:pointer;font-weight:700;font-size:11px;transition:all .2s;text-transform:uppercase;letter-spacing:0.3px}
 .tab:hover{background:#f3f4f6;transform:translateY(-1px)}
 .tab.active{background:#111;color:#fff;border-color:#111}
 #controls{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -71,7 +71,7 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .chariot-item-train.t3{background:var(--train3)}
 
 /* PAGES */
-.content{width:100vw;padding:20px;padding-bottom:70px}
+.content{width:100vw;padding:20px}
 .page{display:none}.page.active{display:block}
 
 /* EDITOR PAGE */
@@ -212,16 +212,14 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .mode-gantt.compact .time-zone.wait{height:14px;top:20px}
 .mode-gantt.compact .time-zone.buffer-coverage{height:14px;top:36px}
 
-/* KPI PANEL */
-.kpi-panel{position:fixed;bottom:0;left:0;right:0;background:#f9fafb;border-top:2px solid #e5e7eb;padding:6px 16px;z-index:10;box-shadow:0 -2px 8px rgba(0,0,0,.05)}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
-.kpi-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;justify-content:center}
-.kpi-card .label{font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700;margin-bottom:2px;letter-spacing:0.3px}
-.kpi-card .value{font-size:16px;font-weight:900;color:#111;line-height:1.1}
-.kpi-card .detail{font-size:8px;color:#6b7280;margin-top:1px}
-.kpi-card.t1 .value{color:var(--train1)}
-.kpi-card.t2 .value{color:var(--train2)}
-.kpi-card.t3 .value{color:var(--train3)}
+/* ZOOM GLOBAL iOS */
+.zoom-controls{display:flex;align-items:center;gap:2px;background:#fff;padding:3px 6px;border-radius:6px;border:1px solid #e5e7eb}
+.zoom-btn{min-width:32px;height:26px;border:2px solid #d0d7de;background:#fff;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;padding:0 6px}
+.zoom-btn:hover{background:#f3f4f6}
+.zoom-btn:active{background:#e5e7eb}
+.zoom-btn.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
+
+#tracking.zoomed{transform-origin:top left}
 </style>
 </head>
 <body>
@@ -229,66 +227,77 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 <div id="topbar">
   <div class="wrap">
     <div class="tabs">
-      <button class="tab active" data-tab="editor">ÉDITEUR</button>
-      <button class="tab" data-tab="tracking">TRACKING</button>
+      <button class="tab active" data-tab="editor">ÉDIT.</button>
+      <button class="tab" data-tab="tracking">TRACK</button>
     </div>
     
     <!-- EDITOR CONTROLS (shown when editor tab is active) -->
-    <div id="editorControls" style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div id="editorControls" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <input type="file" id="fileInputJSON" accept=".json" style="display:none"/>
       <input type="file" id="fileInputCSV" accept=".csv" style="display:none"/>
-      <button id="btnLoadJSON" class="primary" style="font-size:11px;padding:6px 10px">📂 JSON</button>
-      <button id="btnLoadCSV" class="primary" style="font-size:11px;padding:6px 10px">📊 CSV</button>
-      <span style="height:20px;width:1px;background:#dee2e6"></span>
-      <button id="btnDownloadJSON" class="primary" style="font-size:11px;padding:6px 10px">💾 JSON</button>
-      <button id="btnDownloadCSV" class="primary" style="font-size:11px;padding:6px 10px">📊 CSV</button>
-      <button id="btnReset">🔄 RESET</button>
+      <button id="btnLoadJSON" class="primary" style="font-size:10px;padding:4px 8px">📂 JSON</button>
+      <button id="btnLoadCSV" class="primary" style="font-size:10px;padding:4px 8px">📊 CSV</button>
+      <span style="height:16px;width:1px;background:#dee2e6"></span>
+      <button id="btnDownloadJSON" class="primary" style="font-size:10px;padding:4px 8px">💾 JSON</button>
+      <button id="btnDownloadCSV" class="primary" style="font-size:10px;padding:4px 8px">📊 CSV</button>
+      <button id="btnReset" style="font-size:10px;padding:4px 8px">🔄</button>
     </div>
     
     <!-- TRACKING CONTROLS (shown when tracking tab is active) -->
-    <div id="trackingControls" style="margin-left:auto;display:none;gap:8px;align-items:center;flex-wrap:wrap">
-      <span style="font-size:11px;font-weight:700;color:#495057">MODE:</span>
-      <button class="view-mode-btn active" data-mode="symbols" style="font-size:14px;padding:6px 10px">●</button>
-      <button class="view-mode-btn" data-mode="blocks" style="font-size:14px;padding:6px 10px">▬</button>
-      <button class="view-mode-btn" data-mode="gantt" style="font-size:14px;padding:6px 10px">≡</button>
+    <div id="trackingControls" style="margin-left:auto;display:none;gap:5px;align-items:center;flex-wrap:wrap">
+      <button class="view-mode-btn active" data-mode="symbols" style="font-size:12px;padding:4px 8px">●</button>
+      <button class="view-mode-btn" data-mode="blocks" style="font-size:12px;padding:4px 8px">▬</button>
+      <button class="view-mode-btn" data-mode="gantt" style="font-size:12px;padding:4px 8px">≡</button>
       
-      <button id="toggleCompact" class="toggle active" style="font-size:14px;padding:6px 10px">⇕</button>
+      <button id="toggleCompact" class="toggle active" style="font-size:12px;padding:4px 8px">⇕</button>
       
       <!-- CHARIOT SELECTOR -->
       <div class="chariot-selector">
-        <button class="chariot-selector-btn" id="chariotSelectorBtn">
-          SÉLECTION: <span id="selectionCount">0/0</span> ▼
+        <button class="chariot-selector-btn" id="chariotSelectorBtn" style="font-size:10px;padding:4px 8px;min-width:auto">
+          <span id="selectionCount">0/0</span> ▼
         </button>
         <div class="chariot-dropdown" id="chariotDropdown">
           <div class="chariot-dropdown-header">
             <button id="btnSelectAll">Tous</button>
             <button id="btnSelectNone">Aucun</button>
             <button id="btnSelectInvert">Inverser</button>
-            <button id="btnApplySelection" style="margin-left:auto;background:#0aa2b8;color:#fff;font-weight:700">✓ APPLIQUER</button>
+            <button id="btnApplySelection" style="margin-left:auto;background:#0aa2b8;color:#fff;font-weight:700">✓</button>
           </div>
           <div class="chariot-list" id="chariotList"></div>
         </div>
       </div>
       
-      <button class="train-btn all active" data-train="all" style="font-size:11px;padding:6px 10px">ALL</button>
-      <button class="train-btn t1" data-train="1" style="font-size:11px;padding:6px 10px">1</button>
-      <button class="train-btn t2" data-train="2" style="font-size:11px;padding:6px 10px">2</button>
-      <button class="train-btn t3" data-train="3" style="font-size:11px;padding:6px 10px">3</button>
+      <button class="train-btn all active" data-train="all" style="font-size:10px;padding:4px 7px">ALL</button>
+      <button class="train-btn t1" data-train="1" style="font-size:10px;padding:4px 7px">1</button>
+      <button class="train-btn t2" data-train="2" style="font-size:10px;padding:4px 7px">2</button>
+      <button class="train-btn t3" data-train="3" style="font-size:10px;padding:4px 7px">3</button>
       
-      <button id="toggleBuffer" class="toggle" style="font-size:11px;padding:6px 10px">← Buffer (-116)</button>
-      <button id="toggleCyclePlus" class="toggle" style="font-size:11px;padding:6px 10px">Cycle +1 (232) →</button>
+      <button id="toggleBuffer" class="toggle" style="font-size:12px;padding:4px 8px">←</button>
+      <button id="toggleCyclePlus" class="toggle" style="font-size:12px;padding:4px 8px">→</button>
       
-      <span style="height:20px;width:1px;background:#dee2e6"></span>
-      <button id="toggleCoverage1" class="toggle" style="font-size:11px;padding:6px 10px">Couverture 1</button>
-      <button id="toggleCoverage2" class="toggle" style="font-size:11px;padding:6px 10px">Couverture 2</button>
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <button id="toggleCoverage1" class="toggle" style="font-size:10px;padding:4px 8px">Couv.1</button>
+      <button id="toggleCoverage2" class="toggle" style="font-size:10px;padding:4px 8px">Couv.2</button>
       
-      <span style="height:20px;width:1px;background:#dee2e6"></span>
-      <input type="color" id="colorUsage" value="#969696" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur utilisation (gris)"/>
-      <input type="color" id="colorCoverage" value="#4299e1" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur couverture (bleu)"/>
-      <input type="color" id="colorDoubleCoverage" value="#2563eb" style="width:32px;height:24px;padding:2px;border:1px solid #d0d7de;border-radius:4px;cursor:pointer" title="Couleur double couverture"/>
-      <span style="height:20px;width:1px;background:#dee2e6"></span>
-      <span style="font-size:10px;font-weight:700;color:#495057">● TAILLE:</span>
-      <input type="number" id="symbolSize" value="18" min="8" max="50" step="2" style="width:50px;padding:4px 6px;border:1px solid #d0d7de;border-radius:4px;font-size:11px;font-weight:600;text-align:center" title="Taille des symboles (px)"/>
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <input type="color" id="colorUsage" value="#969696" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur utilisation"/>
+      <input type="color" id="colorCoverage" value="#4299e1" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur couverture"/>
+      <input type="color" id="colorDoubleCoverage" value="#2563eb" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur double couverture"/>
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <input type="number" id="symbolSize" value="18" min="8" max="50" step="2" style="width:40px;padding:3px 4px;border:1px solid #d0d7de;border-radius:3px;font-size:10px;font-weight:600;text-align:center" title="Taille symboles"/>
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <button id="btnFullscreen" style="font-size:16px;padding:3px 8px;font-weight:700" title="Fullscreen">⛶</button>
+      
+      <!-- ZOOM GLOBAL iOS -->
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <div class="zoom-controls">
+        <button class="zoom-btn active" data-zoom="1">100</button>
+        <button class="zoom-btn" data-zoom="0.9">90</button>
+        <button class="zoom-btn" data-zoom="0.8">80</button>
+        <button class="zoom-btn" data-zoom="0.7">70</button>
+        <button class="zoom-btn" data-zoom="0.6">60</button>
+        <button class="zoom-btn" data-zoom="0.5">50</button>
+      </div>
     </div>
   </div>
 </div>
@@ -315,11 +324,6 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 
 <!-- TRACKING PAGE -->
 <section class="page" id="tracking">
-  <!-- KPI Panel -->
-  <div class="kpi-panel">
-    <div class="kpi-grid" id="kpiGrid"></div>
-  </div>
-  
   <div class="lanes-container" id="lanesTimeline"></div>
 </section>
 
@@ -858,6 +862,43 @@ function setupTimelines() {
     symbolSize = parseInt(e.target.value) || 18;
     updateSymbolSizes();
   });
+  
+  // Fullscreen button
+  document.getElementById('btnFullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  });
+  
+  // ZOOM GLOBAL iOS
+  document.querySelectorAll('.zoom-btn[data-zoom]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const zoomLevel = parseFloat(btn.dataset.zoom);
+      applyGlobalZoom(zoomLevel);
+      document.querySelectorAll('.zoom-btn[data-zoom]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
+function applyGlobalZoom(level) {
+  const page = document.getElementById('tracking');
+  if(level === 1) {
+    page.style.transform = '';
+    page.style.width = '';
+    page.classList.remove('zoomed');
+  } else {
+    page.classList.add('zoomed');
+    page.style.transform = `scale(${level})`;
+    // Compenser la réduction pour que le contenu prenne toute la largeur disponible
+    page.style.width = (100 / level) + '%';
+  }
+  // Recalculer les positions après le zoom
+  setTimeout(recomputeScale, 50);
 }
 
 function updateSymbolSizes() {
@@ -875,8 +916,6 @@ function updateViewRange() {
 }
 
 function updateTimelines() {
-  updateKPIs();
-  
   const container = document.getElementById('lanesTimeline');
   container.innerHTML = '';
   container.className = 'lanes-container mode-' + visualMode;
@@ -909,36 +948,6 @@ function updateTimelines() {
   }
   
   recomputeScale();
-}
-
-function updateKPIs() {
-  const grid = document.getElementById('kpiGrid');
-  grid.innerHTML = '';
-  
-  const total = lanes.length;
-  const t1Count = lanes.filter(l => l.train === 1).length;
-  const t2Count = lanes.filter(l => l.train === 2).length;
-  const t3Count = lanes.filter(l => l.train === 3).length;
-  const bufferCount = lanes.filter(l => l.buffer === 1).length;
-  
-  const kpis = [
-    { label: 'Total Chariots', value: total, detail: '', cls: '' },
-    { label: 'Train 1', value: t1Count, detail: 'chariots', cls: 't1' },
-    { label: 'Train 2', value: t2Count, detail: 'chariots', cls: 't2' },
-    { label: 'Train 3', value: t3Count, detail: 'chariots', cls: 't3' },
-    { label: 'Avec Buffer', value: bufferCount, detail: `${Math.round(bufferCount/total*100)}%`, cls: '' }
-  ];
-  
-  kpis.forEach(kpi => {
-    const card = document.createElement('div');
-    card.className = 'kpi-card ' + kpi.cls;
-    card.innerHTML = `
-      <div class="label">${kpi.label}</div>
-      <div class="value">${kpi.value}</div>
-      <div class="detail">${kpi.detail}</div>
-    `;
-    grid.appendChild(card);
-  });
 }
 
 function createTrainSeparator(container, trainNum, count) {
