@@ -23,7 +23,7 @@
 html,body{margin:0;background:#fff;color:#111;font:14px/1.35 ui-sans-serif,-apple-system,Segoe UI,Roboto,Arial}
 
 /* TOPBAR */
-#topbar{position:sticky;top:0;z-index:100;border-bottom:2px solid #111;background:#fafafa;padding:6px 12px}
+#topbar{position:sticky;top:0;z-index:100;background:#fafafa;padding:6px 12px}
 #topbar .wrap{max-width:2400px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tab{padding:6px 10px;border:2px solid #111;border-radius:8px;background:#fff;cursor:pointer;font-weight:700;font-size:11px;transition:all .2s;text-transform:uppercase;letter-spacing:0.3px}
@@ -48,6 +48,11 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .train-btn.t1.active{background:var(--train1);border-color:var(--train1)}
 .train-btn.t2.active{background:var(--train2);border-color:var(--train2)}
 .train-btn.t3.active{background:var(--train3);border-color:var(--train3)}
+
+.poste-btn{padding:4px 8px;border:2px solid #d0d7de;background:#fff;border-radius:6px;font-size:9px;font-weight:700;cursor:pointer;transition:all .2s}
+.poste-btn:hover{background:#f3f4f6}
+.poste-btn.active{background:#10b981;color:#fff;border-color:#10b981}
+
 .range-display{font-size:11px;color:#6b7280;font-weight:600;background:#fff;padding:6px 12px;border-radius:6px;border:1px solid #e5e7eb}
 
 /* CHARIOT SELECTOR DROPDOWN */
@@ -79,9 +84,9 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .editor-section{background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:16px}
 .editor-section h3{margin:0 0 12px;font-size:14px;font-weight:800;color:#111;border-bottom:2px solid #e5e7eb;padding-bottom:6px}
 
-/* ONE-LINE LANE EDITOR - POSTE 3X PLUS LARGE (360px au lieu de 60px) */
-.lane-editor{margin-bottom:6px;padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;display:grid;grid-template-columns:auto 140px 60px 60px 60px 60px 60px 360px 80px 80px 50px 80px 80px;gap:6px;align-items:center}
-.lane-editor .train-badge{padding:4px 8px;border-radius:4px;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;white-space:nowrap}
+/* ONE-LINE LANE EDITOR - POSTE RÉDUIT */
+.lane-editor{margin-bottom:6px;padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;display:grid;grid-template-columns:32px 140px 60px 60px 60px 60px 60px 180px 80px 80px 50px 80px 80px;gap:6px;align-items:center}
+.lane-editor .train-badge{padding:4px 6px;border-radius:4px;font-size:9px;font-weight:800;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center}
 .lane-editor .train-badge.t1{background:var(--train1)}
 .lane-editor .train-badge.t2{background:var(--train2)}
 .lane-editor .train-badge.t3{background:var(--train3)}
@@ -178,7 +183,6 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .time-zone.usage{top:50%;transform:translateY(-50%);height:18px;background:linear-gradient(to bottom,rgba(150,150,150,.3),rgba(150,150,150,.5))}
 .time-zone.wait{top:calc(50% + 9px);height:18px;background:linear-gradient(to bottom,rgba(66,153,225,.5),rgba(66,153,225,.7))}
 .time-zone.wait.mirror{opacity:.85}
-.time-zone.usage.mirror{opacity:.3}
 .time-zone.buffer-coverage{top:calc(50% + 27px);height:18px;background:linear-gradient(to bottom,rgba(37,99,235,.6),rgba(37,99,235,.8));border-top:1px solid rgba(37,99,235,.3)}
 .time-label{font-weight:800;font-size:11px;color:#000;text-shadow:0 0 3px #fff,0 0 6px #fff;white-space:nowrap}
 .compact .time-zone.usage{height:14px}
@@ -212,6 +216,11 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 .mode-gantt.compact .time-zone.wait{height:14px;top:20px}
 .mode-gantt.compact .time-zone.buffer-coverage{height:14px;top:36px}
 
+/* TAKT TIME TOGGLE */
+.takt-btn{min-width:36px;height:26px;border:2px solid #d0d7de;background:#fff;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.takt-btn:hover{background:#f3f4f6}
+.takt-btn.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+
 /* ZOOM GLOBAL iOS */
 .zoom-controls{display:flex;align-items:center;gap:2px;background:#fff;padding:3px 6px;border-radius:6px;border:1px solid #e5e7eb}
 .zoom-btn{min-width:32px;height:26px;border:2px solid #d0d7de;background:#fff;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;padding:0 6px}
@@ -226,8 +235,9 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
 
 <div id="topbar">
   <div class="wrap">
+    <button id="btnFullscreen" style="font-size:16px;padding:3px 8px;font-weight:700;border:2px solid #111;border-radius:8px;background:#fff;margin-left:50px" title="Fullscreen">⛶</button>
     <div class="tabs">
-      <button class="tab active" data-tab="editor">ÉDIT.</button>
+      <button class="tab active" data-tab="editor">EDIT</button>
       <button class="tab" data-tab="tracking">TRACK</button>
     </div>
     
@@ -272,6 +282,9 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
       <button class="train-btn t2" data-train="2" style="font-size:10px;padding:4px 7px">2</button>
       <button class="train-btn t3" data-train="3" style="font-size:10px;padding:4px 7px">3</button>
       
+      <span style="height:14px;width:1px;background:#dee2e6"></span>
+      <div id="posteButtonsContainer" style="display:flex;gap:3px;align-items:center"></div>
+      
       <button id="toggleBuffer" class="toggle" style="font-size:12px;padding:4px 8px">←</button>
       <button id="toggleCyclePlus" class="toggle" style="font-size:12px;padding:4px 8px">→</button>
       
@@ -280,13 +293,18 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
       <button id="toggleCoverage2" class="toggle" style="font-size:10px;padding:4px 8px">Couv.2</button>
       
       <span style="height:14px;width:1px;background:#dee2e6"></span>
-      <input type="color" id="colorUsage" value="#969696" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur utilisation"/>
+      <input type="color" id="colorUsage" value="#000000" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur utilisation"/>
       <input type="color" id="colorCoverage" value="#4299e1" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur couverture"/>
       <input type="color" id="colorDoubleCoverage" value="#2563eb" style="width:24px;height:20px;padding:1px;border:1px solid #d0d7de;border-radius:3px;cursor:pointer" title="Couleur double couverture"/>
       <span style="height:14px;width:1px;background:#dee2e6"></span>
       <input type="number" id="symbolSize" value="18" min="8" max="50" step="2" style="width:40px;padding:3px 4px;border:1px solid #d0d7de;border-radius:3px;font-size:10px;font-weight:600;text-align:center" title="Taille symboles"/>
+      
+      <!-- TAKT TIME TOGGLE -->
       <span style="height:14px;width:1px;background:#dee2e6"></span>
-      <button id="btnFullscreen" style="font-size:16px;padding:3px 8px;font-weight:700" title="Fullscreen">⛶</button>
+      <div class="takt-controls" style="display:flex;gap:2px">
+        <button class="takt-btn active" data-takt="116" style="padding:4px 8px;border:2px solid #d0d7de;background:#fff;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer">116</button>
+        <button class="takt-btn" data-takt="70" style="padding:4px 8px;border:2px solid #d0d7de;background:#fff;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer">70</button>
+      </div>
       
       <!-- ZOOM GLOBAL iOS -->
       <span style="height:14px;width:1px;background:#dee2e6"></span>
@@ -309,13 +327,8 @@ button.toggle.active{background:#0aa2b8;color:#fff;border-color:#0aa2b8}
   <div class="editor-container">
     <!-- Main Editor Section -->
     <div class="editor-section" style="margin-top:0">
-      <h3>📝 Chariots</h3>
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-        <button id="btnAddLane" class="primary" style="flex:1">+ AJOUTER CHARIOT</button>
-        <span style="font-size:11px;font-weight:700;color:#6b7280">TRIER PAR:</span>
-        <button id="btnSortTrain" style="font-size:11px;padding:6px 10px">🚂 Train</button>
-        <button id="btnSortName" style="font-size:11px;padding:6px 10px">📝 Nom</button>
-        <button id="btnSortPris" style="font-size:11px;padding:6px 10px">● Pris</button>
+        <button id="btnAddLane" class="primary" style="padding:6px 12px;font-size:14px;font-weight:700">+</button>
       </div>
       <div id="lanesEditorContainer" style="max-height:calc(100vh - 240px);overflow-y:auto;padding-right:8px"></div>
     </div>
@@ -338,7 +351,7 @@ let lanes = [
 
 // Color preferences
 let colorPrefs = {
-  usage: '#969696',  // Gris pour utilisation
+  usage: '#000000',  // Noir pour utilisation
   coverage: '#4299e1',  // Bleu pour couverture
   doubleCoverage: '#2563eb'  // Bleu foncé pour double couverture
 };
@@ -357,6 +370,9 @@ let showCoverage2 = false;
 let visualMode = 'symbols';
 let compactMode = true;  // COMPACT MODE PAR DÉFAUT
 let trainFilter = 'all';
+let posteFilter = 'all';
+let availablePostes = [];  // Liste des postes uniques détectés dans le CSV
+let MAX_TIME = 116;  // Takt time (116 ou 70)
 let MIN = 0, MAX = 116, RANGE = 116;
 let SCALE = 6, MIN_SCALE = 2.5;
 
@@ -403,10 +419,6 @@ function setupEditor() {
     renderEditor();
   });
   
-  document.getElementById('btnSortTrain').addEventListener('click', sortLanesByTrain);
-  document.getElementById('btnSortName').addEventListener('click', sortLanesByName);
-  document.getElementById('btnSortPris').addEventListener('click', sortLanesByPris);
-  
   // Trigger file inputs on button clicks
   document.getElementById('btnLoadJSON').addEventListener('click', () => {
     document.getElementById('fileInputJSON').click();
@@ -442,7 +454,7 @@ function setupEditor() {
           }
           renderEditor();
           updateSelectionCount();
-          alert('JSON chargé avec succès !');
+          // Pas d'alert pour éviter de quitter le fullscreen
         }
       } catch(err) {
         alert('Erreur de lecture du JSON: ' + err.message);
@@ -483,10 +495,14 @@ function setupEditor() {
         if(newLanes.length > 0) {
           lanes = newLanes;
           selectedChariots.clear(); // Reset selection on new import
+          
+          // Extraire les postes uniques et générer les boutons
+          extractPostesAndGenerateButtons();
+          
           renderEditor();
           updateTimelines();
           updateSelectionCount();
-          alert(`${newLanes.length} chariots importés avec succès !`);
+          // Pas d'alert pour éviter de quitter le fullscreen
         }
       } catch(err) {
         alert('Erreur de lecture du CSV: ' + err.message);
@@ -608,27 +624,6 @@ function deleteLane(index) {
   }
 }
 
-function sortLanesByTrain() {
-  lanes.sort((a, b) => {
-    if(a.train !== b.train) return a.train - b.train;
-    return a.name.localeCompare(b.name);
-  });
-  renderEditor();
-}
-
-function sortLanesByName() {
-  lanes.sort((a, b) => a.name.localeCompare(b.name));
-  renderEditor();
-}
-
-function sortLanesByPris() {
-  lanes.sort((a, b) => {
-    if(a.disc !== b.disc) return a.disc - b.disc;
-    return a.name.localeCompare(b.name);
-  });
-  renderEditor();
-}
-
 function exportJSON() {
   const data = {
     lanes: lanes,
@@ -726,6 +721,10 @@ function renderChariotList() {
     // Filter by train if needed
     if(trainFilter !== 'all' && lane.train !== parseInt(trainFilter)) {
       return; // Skip chariots not in selected train
+    }
+    // Filter by poste if needed
+    if(posteFilter !== 'all' && lane.poste !== posteFilter) {
+      return; // Skip chariots not in selected poste
     }
     
     const item = document.createElement('div');
@@ -883,6 +882,16 @@ function setupTimelines() {
       btn.classList.add('active');
     });
   });
+  
+  // TAKT TIME TOGGLE
+  document.querySelectorAll('.takt-btn[data-takt]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      MAX_TIME = parseInt(btn.dataset.takt);
+      document.querySelectorAll('.takt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateViewRange();
+    });
+  });
 }
 
 function applyGlobalZoom(level) {
@@ -908,9 +917,56 @@ function updateSymbolSizes() {
   document.documentElement.style.setProperty('--symbol-cross', Math.round(symbolSize * 0.65) + 'px');
 }
 
+// Extraction des postes uniques et génération des boutons dynamiques
+function extractPostesAndGenerateButtons() {
+  // Extraire les postes uniques
+  const postesSet = new Set();
+  lanes.forEach(lane => {
+    if(lane.poste && lane.poste.trim()) {
+      postesSet.add(lane.poste.trim());
+    }
+  });
+  availablePostes = Array.from(postesSet).sort();
+  
+  // Réinitialiser le filtre
+  posteFilter = 'all';
+  
+  // Générer les boutons
+  const container = document.getElementById('posteButtonsContainer');
+  container.innerHTML = '';
+  
+  // Bouton ALL
+  const allBtn = document.createElement('button');
+  allBtn.className = 'poste-btn active';
+  allBtn.dataset.poste = 'all';
+  allBtn.textContent = 'ALL';
+  allBtn.addEventListener('click', () => handlePosteClick(allBtn, 'all'));
+  container.appendChild(allBtn);
+  
+  // Boutons par poste
+  availablePostes.forEach(poste => {
+    const btn = document.createElement('button');
+    btn.className = 'poste-btn';
+    btn.dataset.poste = poste;
+    // Afficher un libellé court (ex: "1,4" au lieu de "poste 1,4")
+    btn.textContent = poste.replace(/^poste\s*/i, '');
+    btn.addEventListener('click', () => handlePosteClick(btn, poste));
+    container.appendChild(btn);
+  });
+}
+
+function handlePosteClick(btn, poste) {
+  // Désactiver tous les boutons poste
+  document.querySelectorAll('.poste-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  posteFilter = poste;
+  renderChariotList(); // Refresh chariot list when poste filter changes
+  updateTimelines();
+}
+
 function updateViewRange() {
-  MIN = showBuffer ? -116 : 0;
-  MAX = showCyclePlus ? 232 : 116;
+  MIN = showBuffer ? -MAX_TIME : 0;
+  MAX = showCyclePlus ? MAX_TIME * 2 : MAX_TIME;
   RANGE = MAX - MIN;
   updateTimelines();
 }
@@ -924,12 +980,14 @@ function updateTimelines() {
   // Time lane
   createTimeLane(container);
   
-  // Filter lanes by selection
+  // Filter lanes by selection, train and poste
   const filteredLanes = lanes.filter((lane, idx) => {
     // Must be selected
     if(!selectedChariots.has(idx)) return false;
     // Must match train filter if not "all"
     if(trainFilter !== 'all' && lane.train !== parseInt(trainFilter)) return false;
+    // Must match poste filter if not "all"
+    if(posteFilter !== 'all' && lane.poste !== posteFilter) return false;
     return true;
   });
   
